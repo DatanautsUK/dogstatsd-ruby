@@ -260,7 +260,7 @@ class Statsd
   # @param [String] title Event title
   # @param [String] text Event text. Supports \n
   # @param [Hash] opts the additional data about the event
-  # @option opts [Time, nil] :date_happened (nil) Assign a timestamp to the event. Default is now when none
+  # @option opts [Integer, nil] :date_happened (nil) Assign a timestamp to the event. Default is now when none
   # @option opts [String, nil] :hostname (nil) Assign a hostname to the event.
   # @option opts [String, nil] :aggregation_key (nil) Assign an aggregation key to the event, to group it with some others
   # @option opts [String, nil] :priority ('normal') Can be "normal" or "low"
@@ -292,12 +292,12 @@ class Statsd
   end
 
   def format_event(title, text, opts={})
-    escape_event_content title
-    escape_event_content text
+    title = escape_event_content title
+    text = escape_event_content text
     event_string_data = "_e{#{title.length},#{text.length}}:#{title}|#{text}"
 
     # We construct the string to be sent by adding '|key:value' parts to it when needed
-    # All pipes ('|') in the metada are removed. Title and Text can keep theirs
+    # All pipes ('|') in the metadata are removed. Title and Text can keep theirs
     OPTS_KEYS.each do |name_key|
       if name_key[0] != 'tags' && opts[name_key[0].to_sym]
         value = opts[name_key[0].to_sym]
@@ -320,10 +320,10 @@ class Statsd
   end
   private
   def escape_event_content(msg)
-    msg = msg.sub! "\n", "\\n"
+    return msg.gsub "\n", "\\n"
   end
   def rm_pipes(msg)
-    msg = msg.sub! "|", ""
+    return msg.gsub "|", ""
   end
 
   def escape_service_check_message(msg)
